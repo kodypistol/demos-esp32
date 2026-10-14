@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>LED en Bluetooth</title>
+
+<button id="connect">Se connecter à OOTY-LED</button>
+<p id="status">pas connecté</p>
+<input id="brightness" type="range" min="0" max="255" value="0">
+
+<script>
+  const SERVICE_UUID = "601e00fe-4903-499d-9844-df2ab22ab484"
+  const LED_UUID = "90bb32b6-d623-4919-91be-66c7c3e7ecbf"
+
+  const connectButton = document.querySelector("#connect")
+  const status = document.querySelector("#status")
+  const slider = document.querySelector("#brightness")
+
+  let led = null
+
+  async function connect() {
+    const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE_UUID] }] })
+    const server = await device.gatt.connect()
+    const service = await server.getPrimaryService(SERVICE_UUID)
+    led = await service.getCharacteristic(LED_UUID)
+    status.textContent = "connecté"
+  }
+
+  async function sendBrightness() {
+    if (led === null) {
+      return
+    }
+
+    const message = new TextEncoder().encode("led:" + slider.value)
+    await led.writeValueWithResponse(message)
+  }
+
+  connectButton.addEventListener("click", connect)
+  slider.addEventListener("change", sendBrightness)
+</script>

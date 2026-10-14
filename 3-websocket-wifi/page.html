@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>LED</title>
+
+<input id="brightness" type="range" min="0" max="255" value="0">
+
+<script>
+  const ws = new WebSocket("ws://192.168.4.1:81")
+  const slider = document.querySelector("#brightness")
+
+  function sendBrightness() {
+    ws.send("led:" + slider.value)
+  }
+
+  slider.addEventListener("input", sendBrightness)
+</script>
